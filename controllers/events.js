@@ -1,6 +1,9 @@
+var db = require('../config/queries')
 
 var getAllEvents = () => {
-
+	db.findAll('*', 'event_id', function(res) {
+		console.log(res);
+	})
 };
 
 var addEvent = () => {
