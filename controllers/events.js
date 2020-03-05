@@ -2,7 +2,7 @@ var db = require('../config/queries')
 var resStruture = require('../helpers/resStructure')
 
 var getAllEvents = (req, res) => {
-	db.findAll('*', 'event_id', function(err, rows) {
+	db.findAll('*', 'event_id', 'ASC', function(err, rows) {
 		if (err) res.status(400).json();
 
 		const data = []
@@ -12,7 +12,8 @@ var getAllEvents = (req, res) => {
 				data.push(obj)
 			})
 		}
-		res.status(200).json(data);
+		const newData = data.sort((a,b) => +a.id - +b.id)
+		res.status(200).json(newData);
 	})
 };
 
@@ -28,17 +29,16 @@ var addEvent = (req, res) => {
 		created_at
 	} = req.body;
 
-	db.find('event_id', 'event_id', function(err, rows) {
-		if (err) res.status(400).json();
-
-		if (rows.length !== 0 && rows[0].event_id === id) res.status(400).json();
+	db.find('event_id', 'event_id', id, function(err, rows) {
+		if (rows.length) {
+			res.status(400).json()
+			return
+		} 
 
 		db.insert(
 			('event_id, type, actor_id, login, avatar_url, repo_id, name, url, created_at'),
 			([id, type, actor_id, login, avatar_url, repo_id, name, url, created_at]),
-			function(err) {
-				if (err) res.status(400).json();
-	
+			function() {
 				res.status(201).json();
 			}
 		)
@@ -58,7 +58,9 @@ var getByActor = (req, res) => {
 				data.push(obj)
 			})
 		}
-		res.status(200).json(data);
+		
+		const newData = data.sort((a,b) => +a.id - +b.id)
+		res.status(200).json(newData);
 	})
 };
 
